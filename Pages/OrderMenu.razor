@@ -1,0 +1,188 @@
+﻿@page "/order-menu"
+@inject Data.OrderService OrderService
+@inject NavigationManager NavigationManager
+
+<h3>Menu</h3>
+
+@if (ShowNotification)
+{
+    <div class="alert alert-success" role="alert">
+        @NotificationMessage
+    </div>
+}
+
+<select @bind="selectedCategory" class="form-select">
+    <option value="Burgery">Burgery</option>
+    <option value="Napoje">Napoje</option>
+    <option value="Dodatki">Dodatki</option>
+</select>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Nazwa</th>
+            <th>Cena</th>
+            <th>Ilość</th>
+            <th>Akcja</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in filteredMenuItems)
+        {
+            <tr>
+                <td>@item.Name</td>
+                <td>@item.Price.ToString("0.00")</td>
+                <td>
+                    <select @bind="item.Quantity" class="form-select">
+                        @for (int i = 1; i <= 10; i++)
+                        {
+                            <option value="@i">@i</option>
+                        }
+                    </select>
+                </td>
+                <td>
+                    <button class="btn btn-primary" @onclick="() => AddToOrder(item)">Dodaj</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<button class="btn btn-success" @onclick="GoToSummary" disabled="@(!CanGo)">Przejdź do podsumowania</button>
+
+@code {
+
+    private string selectedCategory = "Burgery";
+
+    private List<Models.OrderItems> filteredMenuItems => OrderService.GetItemsByCategory(selectedCategory);
+
+    private bool CanGo => OrderService.CurrentOrder.Count > 0;
+    private string NotificationMessage;
+    private bool ShowNotification = false;
+
+    private async Task AddToOrder(Models.OrderItems item)
+    {
+        if (item.Quantity > 0)
+        {
+            OrderService.AddToOrder(item.Name, item.Price, item.Quantity);
+
+            NotificationMessage = $"Dodano {item.Quantity}x {item.Name} do zamówienia.";
+            ShowNotification = true;
+
+            item.Quantity = 0; 
+
+            await Task.Delay(3000);
+            ShowNotification = false;
+
+            StateHasChanged();
+        }
+    }
+
+    private void GoToSummary()
+    {
+        if (OrderService.CurrentOrder.Count > 0)
+        {
+            NavigationManager.NavigateTo("/order-summary");
+        }
+        else
+        {
+            Console.WriteLine("Aby przejść dalej musisz dodać przynajmniej jedną pozycję!");
+        }
+    }
+}
+
+
+
+@* @page "/order-menu"
+@inject Data.OrderService OrderService
+@inject NavigationManager NavigationManager
+
+<h3>Menu</h3>
+
+@if (ShowNotification)
+{
+    <div class="alert alert-success" role="alert">
+        @NotificationMessage
+    </div>
+}
+
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Nazwa</th>
+            <th>Cena</th>
+            <th>Ilość</th>
+            <th>Akcja</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in MenuItems)
+        {
+            <tr>
+                <td>@item.Name</td>
+                <td>@item.Price.ToString("0.00")</td>
+                <td>
+                    <select @bind="item.Quantity" class="form-select">
+                        @for (int i = 1; i <= 10; i++)
+                        {
+                            <option value="@i">@i</option>
+                        }
+                    </select>
+                </td>
+                <td>
+                    <button class="btn btn-primary" @onclick="() => AddToOrder(item)">Dodaj</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<button class="btn btn-success" @onclick="GoToSummary" disabled="@(!CanGo)">Przejdź do podsumowania</button>
+
+@code {
+
+    private bool CanGo => OrderService.CurrentOrder.Count > 0;
+
+    private string? NotificationMessage;
+    private bool ShowNotification = false;
+
+
+    private List<Models.OrderItems> MenuItems = new()
+    {
+        new Models.OrderItems { Name = "Burger", Price = 10.99m },
+        new Models.OrderItems { Name = "Frytki", Price = 5.99m },
+        new Models.OrderItems { Name = "Napój", Price = 3.99m }
+    };
+
+    private async Task AddToOrder(Models.OrderItems item)
+    {
+        if (item.Quantity > 0)
+        {
+            OrderService.AddToOrder(item.Name, item.Price, item.Quantity);
+
+            NotificationMessage = $"Dodano {item.Quantity}x {item.Name} do zamówienia.";
+            ShowNotification = true;
+
+            item.Quantity = 0;
+
+            await Task.Delay(3000);
+            ShowNotification = false;
+
+            StateHasChanged();
+        }
+    }
+
+    private void GoToSummary()
+    {
+        if (OrderService.CurrentOrder.Count > 0)
+        {
+            NavigationManager.NavigateTo("/order-summary");
+        }
+        else
+        {
+            Console.WriteLine("Aby przejść dalej musisz dodać przynajmniej jedną pozycję!");
+        }
+    }
+}
+ *@

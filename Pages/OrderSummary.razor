@@ -1,0 +1,57 @@
+﻿@page "/order-summary"
+@inject Data.OrderService OrderService
+@inject NavigationManager NavigationManager
+
+<h3>Podsumowanie Zamówienia</h3>
+
+@if (OrderService.CurrentOrder.Count == 0)
+{
+    <p>Twoje zamówienie jest puste.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nazwa</th>
+                <th>Cena</th>
+                <th>Ilość</th>
+                <th>Suma</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in OrderService.CurrentOrder)
+            {
+                <tr>
+                    <td>@item.Name</td>
+                    <td>@item.Price.ToString("0.00")</td>
+                    <td>@item.Quantity</td>
+                    <td>@(item.Price * item.Quantity)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <h4>Łączna kwota: @OrderService.GetTotalPrice().ToString("0.00") zł</h4>
+    <button class="btn btn-danger" @onclick="ClearOrder">Wyczyść Zamówienie</button>
+}
+<button class="btn btn-primary" @onclick="GoBackToMenu">Kontynuuj składanie zamówienia</button>
+
+<button class="btn-link btn-primary" @onclick="GoToPayment">Przejdź do płatności</button>
+
+@code {
+    private void ClearOrder()
+    {
+        OrderService.ClearOrder();
+    }
+
+    private void GoBackToMenu()
+    {
+        NavigationManager.NavigateTo("/order-menu");
+    }
+
+    private void GoToPayment()
+    {
+        NavigationManager.NavigateTo("/payment-screen");
+    }
+}

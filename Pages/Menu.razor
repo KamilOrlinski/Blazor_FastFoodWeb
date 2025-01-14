@@ -1,0 +1,26 @@
+﻿@page "/menu"
+@inject Services.DataService DataService
+
+<h3>Menu</h3>
+
+<table class="table">
+	<thead>
+		<tr>
+			<th>Nazwa</th>
+			<th>Cena (zł)</th>
+		</tr>
+	</thead>
+	<tbody>
+		@foreach (var item in DataService.Menu)
+		{
+			<tr>
+				<td>@item.Name</td>
+				<td>@item.Price</td>
+			</tr>
+		}
+	</tbody>
+</table>
+
+@code {
+
+}

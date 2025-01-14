@@ -1,0 +1,16 @@
+﻿@page "/payment-screen"
+@inject NavigationManager NavigationManager
+@inject Data.OrderService OrderService
+
+<h3>Podsumowanie zamówienia</h3>
+
+<h4>Razem: @OrderService.TotalAmount.ToString("0.00") PLN</h4>
+
+<button class="btn btn-success" @onclick="GoToHome">Zapłać</button>
+
+@code {
+    private void GoToHome()
+    {
+        NavigationManager.NavigateTo("/");
+    }
+}
