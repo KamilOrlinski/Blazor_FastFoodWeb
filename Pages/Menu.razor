@@ -1,24 +1,34 @@
 ﻿@page "/menu"
-@inject Services.DataService DataService
+@inject Data.OrderService OrderService
 
 <h3>Menu</h3>
 
 <table class="table">
-	<thead>
-		<tr>
-			<th>Nazwa</th>
-			<th>Cena (zł)</th>
-		</tr>
-	</thead>
-	<tbody>
-		@foreach (var item in DataService.Menu)
-		{
-			<tr>
-				<td>@item.Name</td>
-				<td>@item.Price</td>
-			</tr>
-		}
-	</tbody>
+    <thead>
+        <tr>
+            <th>Kategoria</th>
+            <th>Nazwa</th>
+            <th>Cena (zł)</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var category in OrderService.Categories)
+        {
+            bool firstRow = true;
+            foreach (var item in category.Items)
+            {
+                <tr>
+                    @if (firstRow)
+                    {
+                        <td rowspan="@category.Items.Count">@category.Name</td>
+                        firstRow = false;
+                    }
+                    <td>@item.Name</td>
+                    <td>@item.Price.ToString("0.00")</td>
+                </tr>
+            }
+        }
+    </tbody>
 </table>
 
 @code {

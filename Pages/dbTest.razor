@@ -1,0 +1,22 @@
+﻿@page "/test-db"
+@inject Data.FastFoodDbContext DbContext
+@using Microsoft.EntityFrameworkCore
+
+<p>@status</p>
+
+@code {
+    private string status = "Sprawdzanie połączenia...";
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var categories = await DbContext.Categories.ToListAsync();
+            status = $"Połączenie działa! Znaleziono {categories.Count} kategorii.";
+        }
+        catch (Exception ex)
+        {
+            status = $"Błąd połączenia: {ex.Message}";
+        }
+    }
+}

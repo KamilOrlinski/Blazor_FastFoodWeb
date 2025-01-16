@@ -2,6 +2,7 @@ using FastFoodWeb.Data;
 using FastFoodWeb.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +13,10 @@ builder.Services.AddSingleton<WeatherForecastService>();
 
 builder.Services.AddSingleton<DataService>();
 builder.Services.AddSingleton<OrderService>();
+
+builder.Services.AddDbContext<FastFoodDbContext>(options =>
+    options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),
+    new MySqlServerVersion(new Version(8, 0, 31))));
 
 var app = builder.Build();
 
