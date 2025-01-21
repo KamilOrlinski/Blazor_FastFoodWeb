@@ -4,13 +4,38 @@
 
 <h3>Podsumowanie zamówienia</h3>
 
+@if (ShowNotification)
+{
+    <div class="alert alert-success" role="alert">
+        @NotificationMessage
+    </div>
+}
+
 <h4>Razem: @OrderService.TotalAmount.ToString("0.00") PLN</h4>
 
 <button class="btn btn-success" @onclick="GoToHome">Zapłać</button>
 
 @code {
-    private void GoToHome()
+
+    private string NotificationMessage;
+    private bool ShowNotification = false;
+
+    private async Task GoToHome()
     {
-        NavigationManager.NavigateTo("/");
+        try
+        {
+            NotificationMessage = $"Zapłacono za zamówienie, zaraz nastąpi przekierowanie na stronę główną.";
+            ShowNotification = true;
+
+            await Task.Delay(3000);
+            ShowNotification = false;
+            //await OrderService.SaveOrderAsync();
+            OrderService.CurrentOrder.Clear();
+            NavigationManager.NavigateTo("/");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Błąd: {ex.Message}");
+        }
     }
 }

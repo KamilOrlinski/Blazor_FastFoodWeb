@@ -50,6 +50,7 @@ namespace FastFoodWeb.Data
             if (existingItem != null)
             {
                 existingItem.Quantity += quantity;
+
             }
             else
             {
@@ -76,6 +77,75 @@ namespace FastFoodWeb.Data
         public decimal GetTotalPrice()
         {
             return CurrentOrder.Sum(item => item.Price * item.Quantity);
+        }
+
+        public async Task InitializeDatabase(FastFoodDbContext dbContext)
+        {
+
+            if (!dbContext.Categories.Any())
+            {
+
+                foreach (var category in Categories)
+                {
+                    var dbCategory = new Category { Name = category.Name };
+                    dbContext.Categories.Add(dbCategory);
+                    await dbContext.SaveChangesAsync();
+
+                    foreach (var item in category.Items)
+                    {
+                        dbContext.OrderItems.Add(new OrderItems
+                        {
+                            Name = item.Name,
+                            Price = item.Price,
+                            CategoryId = dbCategory.Id
+                        });
+                    }
+
+                    await dbContext.SaveChangesAsync();
+                }
+            }
+        }
+
+        private readonly FastFoodDbContext _context;
+
+        public OrderService(FastFoodDbContext context)
+
+        {
+            _context = context;
+        }
+
+        public async Task SaveOrderAsync()
+        {
+            if (CurrentOrder == null || !CurrentOrder.Any())
+                throw new InvalidOperationException("Zamówienie jest puste!");
+
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                var order = new Orders
+                {
+                    OrderDate = DateTime.Now,
+                    TotalAmount = TotalAmount,
+                    Items = CurrentOrder.Select(item => new OrderItems
+                    {
+                        Name = item.Name,
+                        Price = item.Price,
+                        Quantity = item.Quantity,
+                        CategoryId = item.CategoryId
+                    }).ToList()
+                };
+
+                _context.Orders.Add(order);
+                await _context.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+                ClearOrder();
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
     }
 }
